@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>과업 생성</title>
+</head>
+<link rel="stylesheet" type="text/css" href="/static/css/bootstrap.mine.css">
+<style>
+    .main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 1500px;
+        margin-top: -200px;
+        margin-bottom: -150px;
+}
+    .input{
+    border-radius: 2px;
+    border: 1px solid #e0e0e0;
+    background-color: white;
+        height: 27px;
+  }
+  .period-input period-startDate{
+    border: 1px solid #e3e3e3;
+  }
+  .insertProduct{
+    border-radius: 2px;
+    border: none;
+    background-color: navy;
+    height: 45px;
+    width: 65px;
+    color: white;
+      font-size: 14px;
+  }
+  .insertProduct:hover{
+    border-radius: 2px;
+    border: 2px solid navy;
+    background-color: #ffffff;
+    height: 45px;
+    width: 65px;
+    color: navy;
+  }
+  .backbutton{
+    border-radius: 2px;
+    border: none;
+    background-color: #969696;
+    height: 45px;
+    width: 65px;
+    color: white;
+          font-size: 14px;
+  }
+  .backbutton:hover{
+    border-radius: 2px;
+    border: 2px solid #969696;
+    background-color: #ffffff;
+    height: 45px;
+    width: 65px;
+    color: #969696;
+  }
+  .uploadBtn{
+    border: none;
+    border-radius: 2px;
+    background-color: #c7caff;
+    height: 30px;
+  }
+  .deleteBtn{
+    border: none;
+    border-radius: 2px;
+    background-color:#ffbda2;
+    height: 30px;
+    width: 50px;
+  }
+
+  .upload{
+    display: none;
+  }
+  .uploadActive{
+    display: block;
+  }
+  .thumbnail-col{
+    width: 200px;
+    margin: 10px;
+  }
+  .error{
+      font-size: 14px;
+      color: red;
+      margin-left: 120px;
+  }
+  .image-error{
+       font-size: 14px;
+      color: red;
+  }
+</style>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+  <div class="container">
+    <a class="navbar-brand" href="/">Sim B</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item active">
+          <a class="nav-link" href="/">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Services</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Contact</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+<br>
+<br>
+    <div class="main" >
+  <div class="register" style="max-width: 1100px; margin-left: 400px; ">
+    <h1 class="logo" style="font-weight: bold; letter-spacing: -2px;">과업 생성</h1>
+    <br>
+    <div>
+      <form action="/insert" method="post" enctype="multipart/form-data" onsubmit="return InputInFormCheck()">
+        <div class="container">
+          <div class="card" style="height: 50px; width: 700px; display: inline-block; border-top: 3px solid navy; border-radius: 0px; ">
+            <div class="card-list" style="display: inline-block; margin-top: 20px;">
+              <span class="card-title" style="margin-right: 40px; margin-left: 9px;">과업이름</span>
+              <input
+                      type="text"
+                      placeholder="과업이름"
+                      id="task"
+                      name="task"
+                      class="input"
+              />
+              <p id="taskError" class="error"></p>
+            </div>
+          </div>
+          <div class="card" style="height: 50px; width: 700px; display: inline-block; border-top:none;  border-radius: 0px; ">
+            <div class="card-list" style="display: inline-block; margin-top: 20px;">
+              <span class="card-title" style="margin-right: 40px; margin-left: 40px;">이름</span>
+              <input
+                      type="text"
+                      placeholder="이름"
+                      id="name"
+                      name="name"
+                      class="input"
+              />
+              <p id="nameError" class="error"></p>
+                <input type="hidden" value="{{bno}}" name="bno">
+              <input type="hidden" value="{{b_image}}" name="b_image">
+            </div>
+          </div>
+          <div class="card" style="height: 50px; width: 700px; display: inline-block; border-top:none; border-radius: 0px; ">
+            <div class="card-list" style="display: inline-block; margin-top: 20px;">
+              <span class="card-title" style="margin-right: 40px; margin-left: 25px;">연락처</span>
+              <input
+                      type="text"
+                      placeholder="연락처"
+                      id="phone"
+                      name="phone"
+                       class="input"
+              />
+               <p id="phoneError" class="error"></p>
+            </div>
+          </div>
+          <div class="card" style="height: 50px; width: 700px; display: inline-block; border-top:none; border-radius: 0px; ">
+            <div class="card-list" style="display: inline-block; margin-top: 20px;">
+              <span class="card-title" style="margin-right: 40px; margin-left: 25px;">이메일</span>
+              <input
+                      type="text"
+                      placeholder="이메일"
+                      id="email"
+                      name="email"
+                       class="input"
+              />
+               <p id="emailError" class="error"></p>
+            </div>
+          </div>
+           <div class="card" style="height: 50px; width: 700px; display: inline-block; border-top:none; border-radius: 0px; ">
+            <div class="card-list" style="display: inline-block; margin-top: 20px;">
+              <span class="card-title" style="margin-right: 40px; margin-left: 12px;">비밀번호</span>
+              <input
+                      type="password"
+                      placeholder="비밀번호"
+                      id="pwd"
+                      name="pwd"
+                       class="input"
+              />
+               <p id="pwdError" class="error"></p>
+            </div>
+          </div>
+          <div class="card" style="width: 700px; display: inline-block; border-top:none; border-radius: 0px; ">
+                <div class="card-list" style="display: inline-block; margin-top: 20px;">
+              <span class="card-list" style="margin-right: 82px; margin-left: 40px;">도면</span>
+              <div class="card-body"  style="margin-left: 150px">
+                <div class="row">
+                  <div class="col thumbnail-col">
+                      <span class="thumbnail-span">
+                         <input type="file" class="inputActive file-input" id="imageInput" name="floorPlan" />
+                       <div id="imagePreview"></div>
+                                <button class="uploadBtn" id="uploadBtn">업로드</button>
+                                <button class="deleteBtn" style="display: none">삭제</button>
+                      </span>
+                      <p id="imageInputError" class="image-error"></p>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="width: 700px; border-top: none; border-radius: 0px;">
+               <div class="card-list" style="display: inline-block; margin-top: 20px;">
+            <span class="card-list" style="margin-right: 100px; margin-left: 40px; margin-top: 20px;">데이터</span>
+            <div style="margin-left: 150px;">
+              <span class="detail-span" style=" text-align: center">
+                    <input type="file" class="inputActive file-input" id="dataInput" , name="data" />
+               </span>
+               <p id="dataInputError" class="image-error"></p>
+            </div>
+
+          </div>
+          </div>
+          <br>
+          <div style="height: 100px; margin-left: 290px">
+            <button type="submit" class="insertProduct">
+              등록
+            </button>
+            <button type="submit" class="backbutton">취소</button>
+          </div>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+</body>
+{% include 'footer.html' %}
+</html>
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script type="text/javascript" src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+<script type="text/javascript">
+ $(document).ready(function() {
+    $('#uploadBtn').on('click', function(e) {
+        e.preventDefault();
+        uploadImage();
+    });
+
+    $('.deleteBtn').on('click', function(e) {
+        e.preventDefault();
+        removeImage();
+    });
+    var isSubmitting = false;
+    function uploadImage() {
+        let fileInput = $('#imageInput')[0];
+        let imagePreview = $('#imagePreview');
+
+        let file = fileInput.files[0];
+        let reader = new FileReader();
+
+        reader.onloadend = function () {
+            let img = $('<img>');
+            img.attr('src', reader.result);
+            img.css('max-width', '300px'); // 이미지의 최대 너비 설정 (원하는 크기로 변경 가능)
+            imagePreview.append(img);
+            toggleButtons();
+        }
+
+        if (file) {
+            reader.readAsDataURL(file);
+        }
+    }
+    function removeImage() {
+        let fileInput = $('#imageInput')[0];
+        let imagePreview = $('#imagePreview');
+        let uploadBtn = $('.uploadBtn');
+        let deleteBtn = $('.deleteBtn');
+
+        imagePreview.empty();
+
+        fileInput.value = ""; // 파일 선택 초기화
+
+        toggleButtons();
+    }
+
+    function toggleButtons() {
+        let uploadBtn = $('.uploadBtn');
+        let deleteBtn = $('.deleteBtn');
+
+        uploadBtn.toggle();
+        deleteBtn.toggle();
+    }
+
+
+    var form = document.getElementById('myForm');
+    form.addEventListener('submit', function(event) {
+      if (isSubmitting) {
+        event.preventDefault();
+      } else {
+        isSubmitting = true;
+      }
+    });
+});
+</script>
+<script>
+  function InputInFormCheck() {
+        let nonPass = 0
+
+        function nullCheck(inputId, errorTag, errorMsg){
+            value = document.getElementById(inputId).value.trim();
+            if(inputId === "imageInput"){
+                var file = document.getElementById(inputId).files[0];
+                var allowedExtensions = /(\.jpg|\.jpeg|\.png|\.gif)$/i;
+
+                if(file) {
+                    var fileName = file.name;
+
+                    var fileExtension = fileName.substr(fileName.lastIndexOf('.')).toLowerCase();
+                    if (!allowedExtensions.test(fileExtension)) {
+                        errorTag.textContent = "유효한 이미지 파일을 등록해주세요.";
+                        nonPass ++;
+                    } else {
+                        errorTag.textContent = "";
+                    }
+                } else {
+                    errorTag.textContent = errorMsg;
+                    nonPass ++;
+                }
+            }else if(inputId === "dataInput"){
+                var file = document.getElementById(inputId).files[0];
+                if(file) {
+                     var filename = file.name;
+                     if (filename.endsWith('.csv')) {
+                         errorTag.textContent = "";
+                     } else {
+                         errorTag.textContent = "CSV파일이 아닙니다.";
+                         nonPass ++;
+                     }
+                } else {
+                    errorTag.textContent = errorMsg;
+                    nonPass ++;
+                }
+            } else {
+                if(value === "") {
+                    errorTag.textContent = errorMsg;
+                    nonPass ++;
+                } else {
+                    errorTag.textContent = "";
+                }
+            }
+        }
+
+        nullCheck("task", document.getElementById('taskError'), "과업을 입력해주세요.")
+        nullCheck("name", document.getElementById('nameError'), "이름을 입력해주세요.")
+        nullCheck("phone", document.getElementById('phoneError'), "전화번호를 입력해주세요.")
+        nullCheck("email", document.getElementById('emailError'), "이메일을 입력해주세요.")
+        nullCheck("pwd", document.getElementById('pwdError'), "비밀번호를 입력해주세요.")
+        nullCheck("imageInput", document.getElementById('imageInputError'), "도면을 등록해주세요.")
+        nullCheck("dataInput", document.getElementById('dataInputError'), "과업파일을 등록해주세요.")
+
+        console.log("123 : ", nonPass)
+
+        if(nonPass <= 0){   // submit 허용
+            return true;
+
+        } else
+            return false;
+    }
+</script>

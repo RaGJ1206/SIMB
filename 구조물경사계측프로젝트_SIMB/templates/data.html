@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chart Example</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.3.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.7.0/dist/css/bootstrap.min.css">
+    <!-- 합쳐지고 최소화된 최신 CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+
+<!--    &lt;!&ndash; 부가적인 테마 &ndash;&gt;-->
+<!--    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">-->
+
+<!--    &lt;!&ndash; 합쳐지고 최소화된 최신 자바스크립트 &ndash;&gt;-->
+<!--    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>-->
+    <style>
+        .hidden {
+            display: none;
+        }
+
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .container {
+          width: 1300px;
+          margin: 0 auto;
+          padding-bottom: 10px;
+        }
+
+
+        .table-container {
+            margin-top: 20px;
+        }
+
+        .table-container table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table-container th,
+        .table-container td {
+            padding: 10px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .table-container thead {
+            background-color: #0d6efd;
+            color: #fff;
+        }
+
+        .table-container tbody tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        .table-container tbody tr:hover {
+            background-color: #e9ecef;
+        }
+
+       .pagination {
+          display: flex;
+          justify-content: center;
+          margin-top: 10px;
+        }
+
+
+        .pagination a {
+            color: #0d6efd;
+            background-color: #fff;
+            border-color: #0d6efd;
+            padding: 5px 10px;
+            margin-right: 5px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+
+        .pagination a.active {
+            background-color: #0d6efd;
+            color: #fff;
+        }
+
+        .pagination a.prev,
+        .pagination a.next {
+            color: #0d6efd;
+            background-color: #fff;
+            border-color: #0d6efd;
+            padding: 5px 10px;
+            margin-right: 5px;
+        }
+
+        .pagination a.prev.hidden,
+        .pagination a.next.hidden {
+            display: none;
+        }
+        .modal {
+          display: none;
+          position: fixed;
+          z-index: 1;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: 100%;
+          overflow: auto;
+          background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+          background-color: #fefefe;
+          margin: auto;
+          padding: 20px;
+          border: 1px solid #888;
+          max-width: 800px;
+          text-align: center;
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+        }
+
+        .modal-content h2 {
+          margin-bottom: 20px;
+        }
+
+        .modal-content input {
+          margin-bottom: 10px;
+          padding: 5px;
+          width: 150px;
+        }
+        .modal-content button {
+          padding: 8px 20px;
+          margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div>
+            <input type="date" id="selectedDate" value="{{selectedDate}}" min="{{minimum}}" max="{{maximum}}">
+            <button onclick="search()" class="btn btn-primary">검색</button>
+            <button onclick="showDetail()" class="btn btn-success">상세정보</button>
+            <button onclick="showTable()" class="btn btn-primary">표</button>
+            <button onclick="showChart()" class="btn btn-primary">그래프</button>
+            <button id="dia_bt" class="btn btn-danger">저장</button>
+            <span id="realtimeSensor" style="margin-left: 50px; border: 2px solid navy; padding: 10px; border-radius: 5px; font-weight: bold;">
+                ⏲시간 : {{now}} | 🌡️온도 : {{realtimeData.temp}} | 💧습도 : {{realtimeData.humi}}
+            </span>
+        </div>
+        <div id="tableContainer" class="table-container">
+            <input type="hidden" id="taskNumber" value="{{taskNumber}}" >
+            <!-- 데이터프레임 표 -->
+            <table id="tableForm" class="table table-bordered">
+                <!-- 테이블 헤더 -->
+                <thead>
+                    <tr>
+                        {% for col in colList %}
+                        <th>{{ col }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <!-- 테이블 내용 -->
+                <tbody id="tableBody">
+                    {% for row in rowList %}
+                    <tr>
+                        {% for cell in row %}
+                        <td>{{ cell }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+<!--                <thead>-->
+<!--                    <tr>-->
+<!--                         <th>DATE</th>-->
+<!--                        {% for col in cols %}-->
+<!--                        <th>{{ col }}</th>-->
+<!--                        {% endfor %}-->
+<!--                    </tr>-->
+<!--                </thead>-->
+<!--                &lt;!&ndash; 테이블 내용 &ndash;&gt;-->
+<!--                <tbody id="tableBody">-->
+<!--                    {% for date in paging_dates %}-->
+<!--                    <tr>-->
+<!--                        <td>{{date}}</td>-->
+<!--                        {% for col in cols %}-->
+<!--                            {% if paging_rows[date][col] is not defined or paging_rows[date][col] is none %}-->
+<!--                            <td>0</td>-->
+<!--                            {% else %}-->
+<!--                            <td>{{paging_rows[date][col]}}</td>-->
+<!--                            {% endif %}-->
+<!--                        {% endfor %}-->
+<!--                    </tr>-->
+<!--                    {% endfor %}-->
+<!--                </tbody>-->
+<!--            </table>-->
+
+            <!-- 페이징 링크 -->
+            <div class="pagination">
+                {% if startPage != 1 %}
+                    {% if selectedDate != null %}
+                        <a href="/get/chart/search?nowPage={{startPage-1}}&cntPerPage={{cntPerPage}}&taskNumber={{taskNumber}}&selectedDate={{selectedDate}}">이전</a>
+                    {% else %}
+                    <a href="/get/chart?nowPage={{startPage-1}}&cntPerPage={{cntPerPage}}&taskNumber={{taskNumber}}">이전</a>
+                    {% endif %}
+                {% endif %}
+                {% for idx in range(startPage, endPage+1) %}
+                    {% if idx == nowPage %}
+                        <b>{{idx}}</b>
+                    {% endif %}
+                    {% if idx != nowPage %}
+                        {% if selectedDate != null %}
+                                <a href="/get/chart/search?nowPage={{idx}}&cntPerPage={{cntPerPage}}&taskNumber={{taskNumber}}&selectedDate={{selectedDate}}"><b>{{idx}}</b></a>
+                        {% else %}
+                        <a href="/get/chart?nowPage={{idx}}&cntPerPage={{cntPerPage}}&taskNumber={{taskNumber}}"><b>{{idx}}</b></a>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+                {% if endPage != lastPage and lastPage > 10 %}
+                     {% if selectedDate != null %}
+                    <a href="/get/chart/search?nowPage={{endPage+1}}&cntPerPage={{cntPerPage}}&taskNumber={{taskNumber}}&selectedDate={{selectedDate}}">다음</a>
+                    {% else %}
+                    <a href="/get/chart?nowPage={{endPage+1}}&cntPerPage={{cntPerPage}}&taskNumber={{taskNumber}}">다음</a>
+                    {% endif %}
+                {% endif %}
+            </div>
+
+        </div>
+        <div id="dia_rs" class="modal">
+            <div class="modal-content">
+                <h2 style="letter-spacing: -2px">저장할 날짜</h2>
+                <input type="date" id="dowload-start" value="{{minimum}}" min="{{minimum}}" max="{{maximum}}">
+                <b> ~ </b>
+                <input type="date" id="dowload-end" value="{{maximum}}" min="{{minimum}}" max="{{maximum}}">
+                <br>
+                <b style="color: red; font-size: 14px">다운로드 폴더에 저장됩니다.</b>
+                <br>
+                <button id="download-ok" class="btn btn-primary" onclick="downloadFile()">저장</button>
+                <button id="dowload-close" class="btn btn-danger" onclick="closeModal()">취소</button>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        $(function() {
+            $("#dia_bt").click(function() {
+                $("#dia_rs").show();
+
+                $("#download-ok").click(function() {
+                    var taskNumber = document.getElementById("taskNumber").value;
+                    var download_start = document.getElementById("dowload-start").value;
+                    var download_end = document.getElementById("dowload-end").value;
+
+                    $.ajax({
+                       url: '/downloadFile',
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify({ 'taskNumber': taskNumber,
+                            'download_start': download_start,
+                            'download_end':download_end }),
+                        success: function (response) {
+                            console.log(response)
+                        }
+                    });
+                });
+            });
+        });
+
+         function closeModal() {
+            $("#dia_rs").hide();
+        }
+    </script>
+    <script>
+         function showDetail() {
+            var taskNumber = document.getElementById("taskNumber").value;
+           window.location.href = "/get/" +taskNumber;
+        }
+
+        function showTable() {
+            var taskNumber = document.getElementById("taskNumber").value;
+             window.location.href = "/get/chart?taskNumber=" +taskNumber;
+        }
+
+        function showChart() {
+            var taskNumber = document.getElementById("taskNumber").value;
+           window.location.href = "/get/graph?taskNumber=" +taskNumber;
+        }
+
+        function search() {
+            var selectedDate = document.getElementById("selectedDate").value;
+            var taskNumber = document.getElementById("taskNumber").value;
+            window.location.href = "/get/chart/search?taskNumber=" +taskNumber
+                +"&selectedDate=" +selectedDate;
+        }
+            function downloadFile() {
+            var selectedDate = document.getElementById("selectedDate").value;
+            var taskNumber = document.getElementById("taskNumber").value;
+             $.ajax({
+               url: '/downloadFile',
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({ 'taskNumber': taskNumber, 'selectedDate': selectedDate }),
+                success: function (response) {
+                    console.log(response)
+                }
+            });
+        }
+    </script>
+    <script>
+        setInterval(()=>{
+            $.ajax({
+               url: '/realtimeSensor',
+                type: "POST",
+                contentType: "application/json",
+                success: function (response) {
+                    var responseData = response;
+                    var sensorSpan = document.getElementById("realtimeSensor");
+                    sensorSpan.innerHTML = responseData;
+                }
+            });
+         }, 10000)
+    </script>
+</body>
+</html>

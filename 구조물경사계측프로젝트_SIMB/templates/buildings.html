@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<style>
+
+  section {
+   display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  }
+
+  .btn {
+    background-color: navy;
+    color: white;
+    width: 120px;
+    height: 35px;
+    margin-bottom: 20px;
+    font-size: 15px;
+  }
+   .buildings-container {
+     margin-top: 200px;
+     width: 1200px;
+     height: 600px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+   .building {
+    width: 25%;
+    margin: 20px;
+    text-align: center;
+  }
+
+  .building img {
+    width: 300px;
+    height: 300px;
+  }
+
+  .building-name {
+    margin-top: 5px;
+    font-weight: bold;
+  }
+   .pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 120px;
+       margin-bottom: 50px;
+
+    }
+    .pagination a{
+        text-decoration: none;
+        color: #333;
+        margin:0 3px;
+         background-color: #ffffff;
+        color: #8d8d8d;
+        width: 35px;
+        height: 35px;
+        line-height:35px;
+        text-align: center;
+        border: 1px solid #cecece;
+    }
+    .pagination a:hover {
+        background-color: #eee;
+    }
+    .pagination a.active {
+        background-color: #000aa1;
+        color: white;
+    }
+    .pagination .disabled {
+        pointer-events: none;
+        opacity: 0.6;
+    }
+    .builddiv{
+        position: absolute;
+        margin-top: 200px;
+        margin-left: 1390px;
+    }
+    .atag{
+         color:#595959;
+        text-decoration: none;
+    }
+    .atag:hover{
+        color: #737ad9;
+
+
+    }
+</style>
+{% include 'header.html' %}
+<body>
+<div class="builddiv">
+    <a href="/createbuild"><button class="btn" type="submit">계층대상 등록</button></a>
+  </div>
+  <section>
+    <h1 class="fw-light">Nested List</h1>
+
+    <div class="buildings-container" style="display: flex">
+         {% if buildList != [] %}
+                  {% for idx in range(listLength) %}
+                      {% if idx >= (nowPage-1) * cntPage and idx < nowPage * cntPage %}
+                          <div class="building">
+                              <img src="../static/library_images/{{buildList[idx][3]}}" alt="Library Image" id="img">
+                              <input type="hidden" value="{{buildList[idx][0]}}" name="bno">
+                              <a class="atag", href="/task/{{ buildList[idx][0] }}"><div class="building-name">{{buildList[idx][1]}}</div></a>
+                          </div>
+                     {% endif %}
+                {% endfor %}
+        {% else %}
+            <div>
+                <p><strong>등록된 건물이 없습니다.</strong></p>
+            </div>
+        {% endif %}
+
+
+
+    </div>
+
+
+  </section>
+    <br>
+    <br>
+    <br>
+  <div class="pagination">
+        {% if startPage != 1 %}
+            <a href="/?nowPage={{startPage-1}}&cntPerPage={{cntPerPage}}" ><</a>
+        {% endif %}
+        {% for idx in range(startPage, endPage+1) %}
+            {% if idx == nowPage %}
+                <a href="#" class="active">{{idx}}</a>
+            {% endif %}
+            {% if idx != nowPage %}
+                <a href="{{ url_for('buildingList', nowPage=idx, cntPerPage=cntPerPage) }}">{{ idx }}</a>
+            {% endif %}
+        {% endfor %}
+        {% if endPage != lastPage and lastPage > 10 %}
+            <a href="/?nowPage={{endPage+1}}&cntPerPage={{cntPerPage}}" >></a>
+        {% endif %}
+        </div>
+    </div>
+<br>
+</body>
+{% include 'footer.html' %}
+
+</html>
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script type="text/javascript" src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+<script type="text/javascript">
+
+   $(document).ready(function() {
+  $(".pagination").on("click", "a", function(event) {
+    // 모든 페이지 버튼의 active 클래스 제거
+    $(".pagination a").removeClass("active");
+    // 클릭된 페이지 버튼에 active 클래스 추가
+    $(this).addClass("active");
+  });
+});
+</script>

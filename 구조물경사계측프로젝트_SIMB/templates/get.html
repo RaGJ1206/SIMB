@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GET</title>
+</head>
+<style>
+    .main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+    .input{
+    border-radius: 2px;
+    border: 1px solid #e0e0e0;
+    background-color: white;
+        height: 22px;
+  }
+  .period-input period-startDate{
+    border: 1px solid #e3e3e3;
+  }
+  .insertProduct{
+    border-radius: 2px;
+    border: none;
+    background-color: navy;
+    height: 45px;
+    width: 65px;
+    color: white;
+      font-size: 14px;
+  }
+  .insertProduct:hover{
+    border-radius: 2px;
+    border: 2px solid navy;
+    background-color: #ffffff;
+    height: 45px;
+    width: 65px;
+    color: navy;
+  }
+  .backbutton{
+    border-radius: 2px;
+    border: none;
+    background-color: #969696;
+    height: 45px;
+    width: 65px;
+    color: white;
+          font-size: 14px;
+  }
+  .backbutton:hover{
+    border-radius: 2px;
+    border: 2px solid #969696;
+    background-color: #ffffff;
+    height: 45px;
+    width: 65px;
+    color: #969696;
+  }
+  .uploadBtn{
+    border: none;
+    border-radius: 2px;
+    background-color: #c7caff;
+    height: 30px;
+  }
+  .deleteBtn{
+    border: none;
+    border-radius: 2px;
+    background-color:#ffbda2;
+    height: 30px;
+    width: 50px;
+  }
+  body{
+    letter-spacing: -1px;
+  }
+  .upload{
+    display: none;
+  }
+  .uploadActive{
+    display: block;
+  }
+  .thumbnail-col{
+    width: 200px;
+    margin: 10px;
+  }
+</style>
+<body>
+    <div class="main" >
+  <div class="register" style="max-width: 1100px; margin-left: 400px; ">
+    <h1 class="logo" style="font-weight: bold; letter-spacing: -5px;">상세정보 조회</h1>
+    <br>
+    <div>
+        <div class="container">
+            <div class="card" style="height: 50px; width: 700px; display: inline-block; border-top: 3px solid navy;; border-radius: 0px; ">
+            <div class="card-list" style="display: inline-block; margin-top: 20px;">
+              <span class="card-title" style="margin-right: 40px; margin-left: 13px;">과업이름</span>
+               {% for idx in range(task|length) %}
+                <span>
+                    {{ task[idx][1] }}
+                </span>
+            </div>
+          </div>
+          <div class="card" style="height: 50px; width: 700px; display: inline-block; border-top: none; border-radius: 0px; ">
+            <div class="card-list" style="display: inline-block; margin-top: 20px;">
+              <span class="card-title" style="margin-right: 40px; margin-left: 40px;">이름</span>
+                <span>
+                    {{ task[idx][4] }}
+                </span>
+            </div>
+          </div>
+          <div class="card" style="height: 50px; width: 700px; display: inline-block; border-top:none; border-radius: 0px; ">
+            <div class="card-list" style="display: inline-block; margin-top: 20px;">
+              <span class="card-title" style="margin-right: 40px; margin-left: 25px;">연락처</span>
+             <span>
+                    {{ task[idx][5] }}
+                </span>
+            </div>
+          </div>
+          <div class="card" style="height: 50px; width: 700px; display: inline-block; border-top:none; border-radius: 0px; ">
+            <div class="card-list" style="display: inline-block; margin-top: 20px;">
+              <span class="card-title" style="margin-right: 40px; margin-left: 25px;">이메일</span>
+             <span>
+                    {{ task[idx][6] }}
+                </span>
+            </div>
+          </div>
+           <div class="card" style="height: 50px; width: 700px; display: inline-block; border-top:none; border-radius: 0px; ">
+            <div class="card-list" style="display: inline-block; margin-top: 20px;">
+              <span class="card-title" style="margin-right: 40px; margin-left: 12px;">비밀번호</span>
+              <span>
+                    {{ task[idx][7] }}
+                </span>
+            </div>
+          </div>
+          <div class="card" style="width: 700px; display: inline-block; border-top:none; border-radius: 0px; ">
+                <div class="card-list" style="display: inline-block; margin-top: 20px;">
+              <span class="card-list" style="margin-right: 82px; margin-left: 40px;">도면</span>
+              <div class="card-body"  style="margin-left: 150px">
+                <div class="row">
+                  <div class="col thumbnail-col">
+                      <img src="{{ url_for('static', filename='task_images/' + task[idx][2]) }}" style="width: 300px; height: 300px">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="width: 700px; border-top: none; border-radius: 0px;">
+               <div class="card-list" style="display: inline-block; margin-top: 20px;">
+            <span class="card-list" style="margin-right: 100px; margin-left: 40px; margin-top: 20px;">데이터</span>
+            <div style="margin-left: 150px;">
+               <span>
+                    {{ task[idx][3] }}
+                </span>
+                   <a href="/get/chart?taskNumber={{task[idx][0]}}"><button type="submit" class="insertProduct">
+              조회
+            </button></a>
+                <a href="/task/{{task[idx][8]}}"><button type="submit" class="backbutton">취소</button></a>
+            </div>
+          </div>
+          </div>
+                {% endfor %}
+          <br>
+        </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

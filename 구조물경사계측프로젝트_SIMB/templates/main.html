@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,100,300,700" rel="stylesheet" type="text/css">
+    <title>Title</title>
+   <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.mine.css">
+</head>
+<style>
+  section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+img {
+  width: 350px;
+    height: 350px;
+
+}
+
+table {
+   margin-top: 20px;
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 30%;
+}
+td, th {
+    border: 1px solid #e9eeff;
+    text-align: left;
+    padding: 8px;
+}
+th{
+    font-weight: 1000;
+    background-color: #f0f4ff;
+    color: navy;
+    border-top: 3px solid navy;
+}
+/*tr:nth-child(even) {*/
+/*    background-color: #f6f7ff;*/
+/*}*/
+ .btn{
+   background-color: navy;
+   color: white;
+   width: 90px;
+   height: 30px;
+   margin-left: 230px;
+   font-size: 14px;
+     position: absolute;
+     margin-top: -20px;
+ }
+ /* CSS */
+.modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    .modal-content {
+      background-color: #fefefe;
+      margin: auto;
+      margin-top: 100px;
+      padding: 20px;
+      border: 1px solid #888;
+      max-width: 800px;
+      text-align: center;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .modal-content h2 {
+      margin-bottom: 20px;
+    }
+
+    .modal-content input[type="password"] {
+      margin-bottom: 10px;
+      padding: 5px;
+      width: 100%;
+    }
+    .modal-content button {
+      padding: 8px 20px;
+      margin: 5px;
+    }
+    #btn {
+      background-color: #000aa1;
+      color: white;
+      border-radius: 5px;
+    }
+    #closebtn {
+      color: #000000;
+    }
+    .pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 30px;
+        margin-bottom: -50px;
+    }
+    .pagination a{
+        text-decoration: none;
+        color: #333;
+        margin:0 3px;
+         background-color: #ffffff;
+        color: #8d8d8d;
+        width: 35px;
+        height: 35px;
+        line-height:35px;
+        text-align: center;
+        border: 1px solid #cecece;
+    }
+    .pagination a:hover {
+        background-color: #eee;
+    }
+    .pagination a.active {
+        background-color: #000aa1;
+        color: white;
+    }
+    .pagination .disabled {
+        pointer-events: none;
+        opacity: 0.6;
+    }
+    .nav-link{
+        text-decoration: none;
+    }
+</style>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+  <div class="container">
+    <a class="navbar-brand" href="/">Sim B</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item active">
+          <a class="nav-link" href="/">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Services</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Contact</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+<br>
+
+<br>
+<section>
+  <img src="{{ url_for('static', filename='library_images/' + b_image) }}">
+  <a href="/createTask/{{bno}}/{{b_image}}"><button class="btn" type="submit">과업생성</button></a>
+    <a href="/sensor/chart?bno={{bno}}"><button class="btn" type="submit" style="margin-top: -60px">실시간 센서</button></a>
+    <table>
+    <tr>
+        <th style="width: 40px; text-align: center">No.</th>
+        <th style="text-align: center">과업</th>
+        <th style="width: 100px; text-align: center">관리자</th>
+    </tr>
+        {% if taskNameList != [] %}
+            {% for idx in range(listLength) %}
+                {% if idx >= (nowPage-1) * cntPage and idx < nowPage * cntPage %}
+                <tr>
+                    <td style="text-align: center">{{ taskNameList[idx][0] }}</td>
+                    <td><a href="#" class="dia_bt" data-task-number="{{taskNameList[idx][0]}}">{{ taskNameList[idx][1] }}</a></td>
+                    <td style="text-align: center">{{ taskNameList[idx][2] }}</td>
+                    <input type="hidden" class="pwd" value="{{ taskNameList[idx][3] }}">
+                    <input type="hidden" id="taskNumber" value="{{ taskNameList[idx][0] }}">
+                    <input type="hidden" id="b_image" value="{{ b_image }}" class="b_image">
+                </tr>
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            <tr>
+                <td colspan="3" style="text-align: center">
+                      <p><strong>등록된 과업이 없습니다.</strong></p>
+                </td>
+            </tr>
+        {% endif %}
+    </table>
+<div>
+    <br>
+    <div class="pagination">
+    {% if startPage > 1 %}
+        <a href="/task/{{ bno }}/{{ b_image }}?nowPage={{ startPage-1 }}&cntPerPage={{ cntPerPage }}">&lt;</a>
+    {% endif %}
+    {% for idx in range(startPage, endPage+1) %}
+        {% if idx == nowPage %}
+            <a href="#" class="active">{{ idx }}</a>
+        {% else %}
+            <a href="/task/{{ bno }}/{{ b_image }}?nowPage={{ idx }}&cntPerPage={{ cntPerPage }}">{{ idx }}</a>
+        {% endif %}
+    {% endfor %}
+    {% if endPage < lastPage and lastPage > 10 %}
+        <a href="/task/{{ bno }}/{{ b_image }}?nowPage={{ endPage+1 }}&cntPerPage={{ cntPerPage }}">&gt;</a>
+    {% endif %}
+</div>
+  <div id="dia_rs" class="modal">
+    <div class="modal-content">
+        <h2 style="letter-spacing: -2px">비밀번호 확인</h2>
+        <input type="password" id="passwordInput" placeholder="비밀번호 입력" />
+        <button id="btn" onclick="checkPassword()">확인</button>
+        <button id="closebtn" onclick="closeModal()">취소</button>
+    </div>
+</div>
+</div>
+</section>
+
+</body>
+{% include 'footer.html' %}
+</html>
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script type="text/javascript" src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+<script type="text/javascript">
+    $(function() {
+        $(".dia_bt").click(function() {
+            var taskNumber = $(this).data("task-number");
+            $("#dia_rs").show();
+
+            $("#btn").click(function() {
+                checkPassword(taskNumber);
+            });
+        });
+    });
+
+function checkPassword(taskNumber) {
+    var password = $("#passwordInput").val();
+    var pwd = $(".pwd").val();
+    var b_image = $(".b_image").val();
+
+    if (password !== pwd) {
+        alert("비밀번호가 맞지 않습니다.");
+    } else {
+        window.location.href = "/get/" + taskNumber;
+    }
+}
+    function closeModal() {
+      $("#dia_rs").hide();
+    }
+   $(document).ready(function() {
+  $(".pagination").on("click", "a", function(event) {
+    // 모든 페이지 버튼의 active 클래스 제거
+    $(".pagination a").removeClass("active");
+    // 클릭된 페이지 버튼에 active 클래스 추가
+    $(this).addClass("active");
+  });
+});
+
+
+
+</script>

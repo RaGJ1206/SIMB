@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GET</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.3.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.7.0/dist/css/bootstrap.min.css">
+    <!-- 합쳐지고 최소화된 최신 CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.0.2/chart.min.js" integrity="sha512-dnUg2JxjlVoXHVdSMWDYm2Y5xcIrJg1N+juOuRi0yLVkku/g26rwHwysJDAMwahaDfRpr1AxFz43ktuMPr/l1A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <style>
+        .container {
+          width: 1300px;
+          margin: 0 auto;
+          padding-bottom: 10px;
+        }
+        .graph-container {
+            margin-top: 20px;
+            margin-left: -152px;
+        }
+       .modal {
+          display: none;
+          position: fixed;
+          z-index: 1;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: 100%;
+          overflow: auto;
+          background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+          background-color: #fefefe;
+          margin: auto;
+          padding: 20px;
+          border: 1px solid #888;
+          max-width: 800px;
+          text-align: center;
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+        }
+
+        .modal-content h2 {
+          margin-bottom: 20px;
+        }
+
+        .modal-content input {
+          margin-bottom: 10px;
+          padding: 5px;
+          width: 150px;
+        }
+        .modal-content button {
+          padding: 8px 20px;
+          margin: 5px;
+        }
+    </style>
+</head>
+<body>
+ <div class="container">
+     <div>
+        <input type="datetime-local" id="start" value="{{start}}" min="{{minimum}}" max="{{maximum}}">
+        <b> ~ </b>
+        <input type="datetime-local" id="end" value="{{end}}" min="{{minimum}}" max="{{maximum}}">
+        <input type="hidden" id="bno" value="{{bno}}">
+        <div class="btn-group btn-group-toggle" data-toggle="buttons">
+          <label class="btn btn-primary active" id="day">
+            <input type="radio" name="options" autocomplete="off" value="day" {% if time == 'day' or time is none %}checked{% endif %}> 일별
+          </label>
+          <label class="btn btn-primary" id="hour">
+            <input type="radio" name="options" autocomplete="off" value="hour" {% if time == 'hour' %}checked{% endif %}> 시간별
+          </label>
+          <label class="btn btn-primary" id="minute">
+            <input type="radio" name="options" autocomplete="off" value="minute" {% if time == 'minute' %}checked{% endif %}> 분별
+          </label>
+        </div>
+         <button id="btn" onclick="searchGraph()" class="btn btn-primary" >검색</button>
+         <button onclick="showTable()" class="btn btn-primary">표</button>
+         <button onclick="showChart()" class="btn btn-primary">그래프</button>
+         <button onclick="backMoving()" class="btn btn-success">돌아가기</button>
+         <button id="download" class="btn btn-danger">저장</button>
+         <button id="add" class="btn btn-secondary">데이터 추가</button>
+         <button onclick="delData()" class="btn btn-danger">추가 데이터 삭제</button>
+     </div>
+    <div style="width: 1500px" class="graph-container">
+		<canvas id="overtime_expenditure" max-width="100" max-height="100"></canvas>
+    </div>
+    <div id="downloadData" class="modal dia_rs">
+        <div class="modal-content">
+            <h2 style="letter-spacing: -2px">저장할 날짜</h2>
+            <input type="date" id="dowload-start" value="{{minimum}}" min="{{minimum}}" max="{{maximum}}">
+            <b> ~ </b>
+            <input type="date" id="dowload-end" value="{{maximum}}" min="{{minimum}}" max="{{maximum}}">
+            <br>
+            <b style="color: red; font-size: 14px">다운로드 폴더에 저장됩니다.</b>
+            <br>
+            <button id="download-ok" class="btn btn-primary" onclick="downloadFile()">저장</button>
+            <button id="dowload-close" class="btn btn-danger" onclick="closeModal()">취소</button>
+        </div>
+    </div>
+     <div id="addData" class="modal dia_rs">
+         <div class="modal-content">
+                <h2 style="letter-spacing: -2px">저장할 데이터</h2>
+                <input type="file" id="dataInput">
+                <br>
+                <b id="dataInputError" style="color: red; font-size: 14px"></b>
+                <br>
+                <button id="add-ok" class="btn btn-primary" onclick="addData()">추가</button>
+                <button id="add-close" class="btn btn-danger" onclick="closeModal()">취소</button>
+         </div>
+     </div>
+     <script>
+         $(function (){
+
+             $("input[name='options']").click(function(){
+                 console.log("확인")
+                 $("input[name='options']").parent().attr('class', 'btn btn-primary')
+                 var time = $("input[name='options']:checked").val()
+                 $("#"+time).attr('class', 'btn btn-primary active')
+             })
+         })
+     </script>
+
+
+
+    <script type="text/javascript">
+        $(function() {
+            $("#download").click(function() {
+                $("#downloadData").show();
+
+                $("#download-ok").click(function() {
+                    var download_start = document.getElementById("dowload-start").value;
+                    var download_end = document.getElementById("dowload-end").value;
+
+                    $.ajax({
+                       url: '/downloadSensorFile',
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify({ 'download_start': download_start, 'download_end':download_end }),
+                        success: function (response) {
+                            console.log(response)
+                        }
+                    });
+                });
+            });
+        });
+
+         $(function() {
+            $("#add").click(function() {
+                $("#addData").show();
+
+                $("#add-ok").click(function() {
+                    var bno = document.getElementById("bno").value;
+                    var file = document.getElementById("dataInput").files[0];
+                    var errorTag = document.getElementById('dataInputError')
+
+                    if(file) {
+                         var filename = file.name;
+                         if (filename.endsWith('.csv')) {
+                              const formData = new FormData();
+                              formData.append('file', file);
+
+                             $.ajax({
+                                 url: '/addData',
+                                 type: "POST",
+                                 data: formData,
+                                 processData: false,
+                                 contentType: false,
+                                 success: function (response) {
+                                     window.location.href = "/sensor/chart?bno=" +bno
+                                 }
+                            });
+                         } else {
+                             errorTag.textContent = "CSV파일이 아닙니다.";
+                         }
+                    } else {
+                        errorTag.textContent = "과업파일을 등록해주세요.";
+                    }
+                });
+            });
+        });
+        function closeModal() {
+            $(".dia_rs").hide();
+        }
+    </script>
+    <script type="text/javascript">
+        $(function() {
+            $("#dia_bt").click(function() {
+                $("#dia_rs").show();
+
+                $("#download-ok").click(function() {
+                    var taskNumber = document.getElementById("taskNumber").value;
+                    var download_start = document.getElementById("dowload-start").value;
+                    var download_end = document.getElementById("dowload-end").value;
+
+                    $.ajax({
+                       url: '/downloadFile',
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify({ 'taskNumber': taskNumber, 'download_start': download_start, 'download_end':download_end }),
+                        success: function (response) {
+                            console.log(response)
+                        }
+                    });
+                });
+            });
+        });
+         function closeModal() {
+            $(".dia_rs").hide();
+        }
+    </script>
+  <script>
+         function backMoving() {
+            var bno = document.getElementById("bno").value;
+           window.location.href = "/task/" +bno;
+        }
+
+        function showTable() {
+            var bno = document.getElementById("bno").value;
+             window.location.href = "/sensor/chart?bno=" +bno
+        }
+
+        function showChart() {
+           var bno = document.getElementById("bno").value;
+           window.location.href = "/sensor/graph?bno=" +bno;
+        }
+
+         function searchGraph() {
+            var start = document.getElementById('start').value.replace("T", " ")
+            var end = document.getElementById('end').value.replace("T", " ")
+            var bno = document.getElementById("bno").value;
+            var time = document.querySelector("input[name='options']:checked").value;
+            console.log(start)
+            console.log(end)
+            console.log(time)
+            window.location.href = "/sensor/graph?start="+start
+                +"&end="+end
+                +"&bno="+bno
+                +"&time="+time;
+        }
+
+        function  delData() {
+              var bno = document.getElementById("bno").value;
+               $.ajax({
+                     url: '/delData',
+                     type: "POST",
+                     success: function (response) {
+                        window.location.href = "/sensor/chart?bno=" +bno
+                     }
+                });
+         }
+    </script>
+    <script>
+		let cols = {{ cols | tojson }};
+		let filter_dates = {{ filter_dates | tojson }};
+        let filter_rows = {{ filter_rows | tojson }};
+
+        // var date = new Date(rowList[0][0]);
+        // var formattedDate = date.toISOString().slice(0, 19).replace("T", " ");
+        document.getElementById('start').setAttribute('value', filter_dates[0]);
+
+        colors = []
+        colors.push('rgb(255,105,180)')
+        colors.push('rgb(255, 0, 0)')
+        for (let r = 0; r < 256; r += 64) {
+          for (let g = 0; g < 256; g += 64) {
+            for (let b = 0; b < 256; b += 64) {
+              let color = `rgb(${r}, ${g}, ${b})`;
+              colors.push(color);
+            }
+          }
+        }
+
+		tasks = []
+		for(var i=0;i<cols.length;i++){
+			tasks.push({
+				label: cols[i],
+				fill: false,
+				borderColor: colors[i],
+				lineTension: 0.1,
+				data: filter_rows[i]
+			})
+		}
+		new Chart(document.getElementById("overtime_expenditure"), {
+		  type: "line",
+		  data: {
+			labels: filter_dates,
+			datasets: tasks
+		  },
+		  options: {}
+		});
+
+        console.log(tasks)
+
+	</script>
+</body>
+</html>

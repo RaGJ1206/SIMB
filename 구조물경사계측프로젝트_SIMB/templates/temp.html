@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<!--    {{cols}}-->
+<!--<br>-->
+<!--    {% for date in dates %}-->
+<!--        {{date}} : {{rows[date]}}<br>-->
+<!--    {% endfor %}-->
+<table>
+    <!--  배터리 'BATT'와 온도 'TEMP'는 무조건 있다는 전제로 한다.  -->
+    <tr>
+        <th>DATE</th>
+        {% for col in cols %}
+        <th>{{col}}</th>
+        {% endfor %}
+    </tr>
+
+    {% for date in dates %}
+    <tr>
+        <td>{{date}}</td>
+        {% for col in cols %}
+            {% if rows[date][col] is not defined or rows[date][col] is none %}
+                <td>0</td>
+            {% else %}
+                <td>{{rows[date][col]}}</td>
+            {% endif %}
+        {% endfor %}
+    </tr>
+    {% endfor %}
+
+</table>
+</body>
+</html>

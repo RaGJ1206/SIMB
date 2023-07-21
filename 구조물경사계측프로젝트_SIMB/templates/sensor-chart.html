@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chart Example</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.3.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.7.0/dist/css/bootstrap.min.css">
+    <!-- 합쳐지고 최소화된 최신 CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+
+<!--    &lt;!&ndash; 부가적인 테마 &ndash;&gt;-->
+<!--    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">-->
+
+<!--    &lt;!&ndash; 합쳐지고 최소화된 최신 자바스크립트 &ndash;&gt;-->
+<!--    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>-->
+    <style>
+        .hidden {
+            display: none;
+        }
+
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .container {
+          width: 1300px;
+          margin: 0 auto;
+          padding-bottom: 10px;
+        }
+
+
+        .table-container {
+            margin-top: 20px;
+        }
+
+        .table-container table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table-container th,
+        .table-container td {
+            padding: 10px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .table-container thead {
+            background-color: #0d6efd;
+            color: #fff;
+        }
+
+        .table-container tbody tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        .table-container tbody tr:hover {
+            background-color: #e9ecef;
+        }
+
+       .pagination {
+          display: flex;
+          justify-content: center;
+          margin-top: 10px;
+        }
+
+
+        .pagination a {
+            color: #0d6efd;
+            background-color: #fff;
+            border-color: #0d6efd;
+            padding: 5px 10px;
+            margin-right: 5px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+
+        .pagination a.active {
+            background-color: #0d6efd;
+            color: #fff;
+        }
+
+        .pagination a.prev,
+        .pagination a.next {
+            color: #0d6efd;
+            background-color: #fff;
+            border-color: #0d6efd;
+            padding: 5px 10px;
+            margin-right: 5px;
+        }
+
+        .pagination a.prev.hidden,
+        .pagination a.next.hidden {
+            display: none;
+        }
+        .modal {
+          display: none;
+          position: fixed;
+          z-index: 1;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: 100%;
+          overflow: auto;
+          background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+          background-color: #fefefe;
+          margin: auto;
+          padding: 20px;
+          border: 1px solid #888;
+          max-width: 800px;
+          text-align: center;
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+        }
+
+        .modal-content h2 {
+          margin-bottom: 20px;
+        }
+
+        .modal-content input {
+          margin-bottom: 10px;
+          padding: 5px;
+          width: 150px;
+        }
+        .modal-content button {
+          padding: 8px 20px;
+          margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div>
+            <input type="date" id="selectedDate" value="{{selectedDate}}" min="{{minimum}}" max="{{maximum}}">
+            <button onclick="searchSensor()" class="btn btn-primary">검색</button>
+            <button onclick="showTable()" class="btn btn-primary">표</button>
+            <button onclick="showChart()" class="btn btn-primary" {% if null_data  %}disabled="disabled"{% endif %}>그래프</button>
+            <button onclick="backMoving()" class="btn btn-success">돌아가기</button>
+            <button id="download" class="btn btn-danger">저장</button>
+            <button id="add" class="btn btn-secondary">데이터 추가</button>
+            <button onclick="delData()" class="btn btn-danger">추가 데이터 삭제</button>
+        </div>
+        <div id="tableContainer" class="table-container">
+            <input type="hidden" id="bno" value="{{bno}}" >
+            <!-- 데이터프레임 표 -->
+            <table id="tableForm" class="table table-bordered">
+                <!-- 테이블 헤더 -->
+                <thead>
+                    <tr>
+                         <th>DATE</th>
+                        {% for col in cols %}
+                        <th>{{ col }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <!-- 테이블 내용 -->
+                <tbody id="tableBody">
+                    {% for date in paging_dates %}
+                    <tr>
+                        <td>{{date}}</td>
+                        {% for col in cols %}
+                            {% if paging_rows[date][col] is not defined or paging_rows[date][col] is none %}
+                            <td>0</td>
+                            {% else %}
+                            <td>{{paging_rows[date][col]}}</td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- 페이징 링크 -->
+            <div class="pagination">
+                {% if startPage != 1 %}
+                    {% if selectedDate != null %}
+                        <a href="/sensor/chart/search?nowPage={{startPage-1}}&cntPerPage={{cntPerPage}}&bno={{bno}}&selectedDate={{selectedDate}}">이전</a>
+                    {% else %}
+                    <a href="/sensor/chart?nowPage={{startPage-1}}&cntPerPage={{cntPerPage}}&bno={{bno}}">이전</a>
+                    {% endif %}
+                {% endif %}
+                {% for idx in range(startPage, endPage+1) %}
+                    {% if idx == nowPage %}
+                        <b>{{idx}}</b>
+                    {% endif %}
+                    {% if idx != nowPage %}
+                        {% if selectedDate != null %}
+                                <a href="/sensor/chart/search?nowPage={{idx}}&cntPerPage={{cntPerPage}}&bno={{bno}}&selectedDate={{selectedDate}}"><b>{{idx}}</b></a>
+                        {% else %}
+                        <a href="/sensor/chart?nowPage={{idx}}&cntPerPage={{cntPerPage}}&bno={{bno}}"><b>{{idx}}</b></a>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+                {% if endPage != lastPage and lastPage > 10 %}
+                     {% if selectedDate != null %}
+                    <a href="/sensor/chart/search?nowPage={{endPage+1}}&cntPerPage={{cntPerPage}}&bno={{bno}}&selectedDate={{selectedDate}}">다음</a>
+                    {% else %}
+                    <a href="/sensor/chart?nowPage={{endPage+1}}&cntPerPage={{cntPerPage}}&bno={{bno}}">다음</a>
+                    {% endif %}
+                {% endif %}
+            </div>
+
+        </div>
+        <div id="downloadData" class="modal dia_rs">
+            <div class="modal-content">
+                <h2 style="letter-spacing: -2px">저장할 날짜</h2>
+                <input type="date" id="dowload-start" value="{{minimum}}" min="{{minimum}}" max="{{maximum}}">
+                <b> ~ </b>
+                <input type="date" id="dowload-end" value="{{maximum}}" min="{{minimum}}" max="{{maximum}}">
+                <br>
+                <b style="color: red; font-size: 14px">다운로드 폴더에 저장됩니다.</b>
+                <br>
+                <button id="download-ok" class="btn btn-primary" onclick="downloadFile()">저장</button>
+                <button id="dowload-close" class="btn btn-danger" onclick="closeModal()">취소</button>
+            </div>
+        </div>
+         <div id="addData" class="modal dia_rs">
+            <div class="modal-content">
+                <h2 style="letter-spacing: -2px">저장할 데이터</h2>
+                <input type="file" id="dataInput">
+                <br>
+                <b id="dataInputError" style="color: red; font-size: 14px"></b>
+                <br>
+                <button id="add-ok" class="btn btn-primary" onclick="addData()">추가</button>
+                <button id="add-close" class="btn btn-danger" onclick="closeModal()">취소</button>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        $(function() {
+            $("#download").click(function() {
+                $("#downloadData").show();
+
+                $("#download-ok").click(function() {
+                    var download_start = document.getElementById("dowload-start").value;
+                    var download_end = document.getElementById("dowload-end").value;
+
+                    $.ajax({
+                       url: '/downloadSensorFile',
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify({ 'download_start': download_start, 'download_end':download_end }),
+                        success: function (response) {
+                            console.log(response)
+                        }
+                    });
+                });
+            });
+        });
+
+         $(function() {
+            $("#add").click(function() {
+                $("#addData").show();
+
+                $("#add-ok").click(function() {
+                    var bno = document.getElementById("bno").value;
+                    var file = document.getElementById("dataInput").files[0];
+                    var errorTag = document.getElementById('dataInputError')
+
+                    if(file) {
+                         var filename = file.name;
+                         if (filename.endsWith('.csv')) {
+                              const formData = new FormData();
+                              formData.append('file', file);
+
+                             $.ajax({
+                                 url: '/addData',
+                                 type: "POST",
+                                 data: formData,
+                                 processData: false,
+                                 contentType: false,
+                                 success: function (response) {
+                                     window.location.href = "/sensor/chart?bno=" +bno
+                                 }
+                            });
+                         } else {
+                             errorTag.textContent = "CSV파일이 아닙니다.";
+                         }
+                    } else {
+                        errorTag.textContent = "과업파일을 등록해주세요.";
+                    }
+                });
+            });
+        });
+
+         function closeModal() {
+            $(".dia_rs").hide();
+        }
+    </script>
+    <script>
+         function backMoving() {
+            var bno = document.getElementById("bno").value;
+           window.location.href = "/task/" +bno;
+        }
+
+        function showTable() {
+            var bno = document.getElementById("bno").value;
+             window.location.href = "/sensor/chart?bno=" +bno
+        }
+
+        function showChart() {
+           var bno = document.getElementById("bno").value;
+           window.location.href = "/sensor/graph?bno=" +bno;
+        }
+
+        function searchSensor() {
+            var selectedDate = document.getElementById("selectedDate").value;
+              var bno = document.getElementById("bno").value;
+            window.location.href = "/sensor/chart/search?bno=" +bno
+                +"&selectedDate=" +selectedDate;
+        }
+
+        function  delData() {
+              var bno = document.getElementById("bno").value;
+               $.ajax({
+                     url: '/delData',
+                     type: "POST",
+                     success: function (response) {
+                        window.location.href = "/sensor/chart?bno=" +bno
+                     }
+                });
+         }
+    </script>
+</body>
+</html>
